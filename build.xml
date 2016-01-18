@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="businesslogic-service" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+    <property name="ivy.install.version" value="2.4.0-rc1" />
+    <property name="ivy.jar.dir" value="${basedir}/ivy" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+    
+    <target name="download-ivy" unless="skip.download">
+        <mkdir dir="${ivy.jar.dir}" />
+        <echo message="installing ivy..." />
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true" />
+    </target>
+
+    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar" />
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+    </target>
+
+    <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with ivy">
+        <ivy:retrieve pattern="${lib.dir}/[type]s-[artifact]-[revision].[ext]" />
+    </target>
+
+    <property name="build.dir" value="build" />
+    <property name="src.dir" value="src" />
+    <property name="lib.dir" value="lib" />
+
+    <path id="classpath.id">
+        <fileset dir="${lib.dir}" />
+    </path>
+    
+    <target name="init" depends="install-ivy, resolve">
+        <mkdir dir="${build.dir}" />
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}" />
+        <delete dir="${lib.dir}" />
+        <delete dir="${ivy.jar.dir}" />
+    </target>
+
+    <property name="storage.wsdl" value="http://127.0.0.1:7002/soap/storage?wsdl" />
+    <target name="import">
+        <exec executable="wsimport">
+            <arg line="${storage.wsdl} -s src -Xnocompile" />
+        </exec>
+    </target>
+
+    <target name="compile" depends="init,import">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath.id" includeAntRuntime="false"/>
+    </target>
+
+    <target name="start" depends="compile" >
+        <java classname="introsde.finalproject.businesslogic.ServiceStandalone" classpath="${build.dir}" classpathref="classpath.id" fork="true"/>
+    </target>
+</project>
