@@ -158,7 +158,7 @@ public class ServiceImpl implements Service {
                     result = "You have achieved your goal!!!\n"
                              + storageService.getServiceImplPort().getCongratsPicture();
                 } else if (dayProgress >= 1.5*userGoalValue) {
-                    result = "You have overachieved your goal!!! Maybe you need to update your daily goal?;)"
+                    result = "You have overachieved your goal!!! Maybe you need to update your daily goal?;)\n"
                              + storageService.getServiceImplPort().getCongratsPicture();
                 } 
             }
